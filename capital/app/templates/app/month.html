@@ -1,0 +1,142 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'app/main.css' %}">
+
+<h3>This month:</h3>
+
+<h4>Expenses</h4>
+
+<table>
+    <tr>
+        <th>Category</th>
+        <th>Subcategory</th>
+        <th>Value</th>
+    </tr>
+    {% for category, subcategory in expenses.items %}
+    {% for subcat_name, value in subcategory.items %}
+    <tr>
+        <td>{{ category }}</td>
+        <td>{{ subcat_name }}</td>
+        <td>{{ value }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    <tr>
+        <td>Total</td>
+        <td></td>
+        <td>{{ total_expenses }}</td>
+    </tr>
+</table>
+
+<h4>Income</h4>
+
+<table>
+    <tr>
+        <th>Category</th>
+        <th>Subcategory</th>
+        <th>Value</th>
+    </tr>
+    {% for category, subcategory in income.items %}
+    {% for subcat_name, value in subcategory.items %}
+    <tr>
+        <td>{{ category }}</td>
+        <td>{{ subcat_name }}</td>
+        <td>{{ value }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    <tr>
+        <td>Total</td>
+        <td></td>
+        <td>{{ total_income }}</td>
+    </tr>
+</table>
+
+<h4>Accounts</h4>
+
+<table>
+    <tr>
+        <th>Account</th>
+        <th>Balance at begining of month</th>
+        <th>Balance at end of month</th>
+    </tr>
+    {% for account, status in status_of_accounts.items %}
+    <tr>
+        <td>{{ account }}</td>
+        <td>{{ status.0 }}</td>
+        <td>{{ status.1 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h4>Income Transactions</h4>
+
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Value</th>
+        <th>Comment</th>
+        <th>Account</th>
+        <th>Subcategory</th>
+    </tr>
+    {% for transaction in income_transactions %}
+    <tr>
+        <td>{{ transaction.date.year }}-{{ transaction.date.month }}-{{ transaction.date.day }}</td>
+        <td>{{ transaction.value }}</td>
+        <td>{{ transaction.comment }}</td>
+        <td>{{ transaction.account }}</td>
+        <td>{{ transaction.subcategory }}</td>
+        <td><a href="{% url 'app:edit_income_transaction' transaction.id %}">edit</a></td>
+        <td><a href="{% url 'app:delete_income_transaction' transaction.id %}">delete</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h4>Expense Transactions</h4>
+
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Value</th>
+        <th>Comment</th>
+        <th>Account</th>
+        <th>Subcategory</th>
+    </tr>
+    {% for transaction in expense_transactions %}
+    <tr>
+        <td>{{ transaction.date.year }}-{{ transaction.date.month }}-{{ transaction.date.day }}</td>
+        <td>{{ transaction.value }}</td>
+        <td>{{ transaction.comment }}</td>
+        <td>{{ transaction.account }}</td>
+        <td>{{ transaction.subcategory }}</td>
+        <td><a href="{% url 'app:edit_expense_transaction' transaction.id %}">edit</a></td>
+        <td><a href="{% url 'app:delete_expense_transaction' transaction.id %}">delete</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if transfers %}
+<h4>Tranfer Transactions</h4>
+
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Value</th>
+        <th>Comment</th>
+        <th>From</th>
+        <th>To</th>
+    </tr>
+    {% for transfer in transfers %}
+    <tr>
+        <td>{{ transfer.date.year }}-{{ transfer.date.month }}-{{ transfer.date.day }}</td>
+        <td>{{ transfer.value }}</td>
+        <td>{{ transfer.comment }}</td>
+        <td>{{ transfer.from_account }}</td>
+        <td>{{ transfer.to_account }}</td>
+        <td><a href="{% url 'app:edit_transfer_transaction' transfer.id %}">edit</a></td>
+        <td><a href="{% url 'app:delete_transfer_transaction' transfer.id %}">delete</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+<a href="{% url 'app:index' %}">Back</a>

@@ -1,0 +1,29 @@
+{% include "./base.html" %}
+
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'app/main.css' %}">
+
+<p>Welcome {{ username }}</p>
+
+<a href="{% url 'app:expense' %}">Add expense</a>
+<br>
+<a href="{% url 'app:income' %}">Add income</a>
+<br>
+<a href="{% url 'app:transfer' %}">Transfer</a>
+<br>
+
+<a href="{% url 'app:accounts' %}">Accounts</a>
+<br>
+
+<a href="{% url 'app:current' %}">This month</a>
+<br>
+
+<p>Months available:</p>
+<ul>
+{% for year, month in months_available %}
+<li><a href="{% url 'app:index' %}{{ year }}/{{ month }} ">{{ year }} - {{ month }}</a></li>
+{% endfor %}
+</ul>
+<br>
+
+<a href="{% url 'app:logout' %}">Logout</a>

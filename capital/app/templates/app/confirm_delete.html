@@ -1,0 +1,8 @@
+<h2>Delete?</h2>
+
+<form method="post">{% csrf_token %}
+    Are you sure you want to delete "{{ object }}" ?<br/>
+    <input type="submit" value="Delete" />
+</form>
+
+<a href="{% url 'app:index' %}">Back</a>

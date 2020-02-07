@@ -1,1 +1,6 @@
 .idea
+*.csv
+insert.py
+db.sqlite3
+__pycache__
+
