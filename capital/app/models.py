@@ -2,9 +2,16 @@ import datetime
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+
+
+class User(AbstractUser):
+    pass
 
 
 class Account(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
     init_balance = models.IntegerField()
 
@@ -43,6 +50,7 @@ class ExpenseSubcategory(models.Model):
 
 
 class IncomeTransaction(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField('transaction date')
     value = models.FloatField(default=0)
     comment = models.CharField(max_length=100, blank=True)
@@ -62,6 +70,7 @@ class IncomeTransaction(models.Model):
 
 
 class ExpenseTransaction(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField('transaction date')
     value = models.FloatField(default=0)
     comment = models.CharField(max_length=100, blank=True)
@@ -81,6 +90,7 @@ class ExpenseTransaction(models.Model):
 
 
 class TransferTransaction(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateField('transaction date')
     value = models.FloatField(default=0)
     comment = models.CharField(max_length=100, blank=True)

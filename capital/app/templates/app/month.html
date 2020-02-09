@@ -85,8 +85,8 @@
         <td>{{ transaction.comment }}</td>
         <td>{{ transaction.account }}</td>
         <td>{{ transaction.subcategory }}</td>
-        <td><a href="{% url 'app:edit_income_transaction' transaction.id %}">edit</a></td>
-        <td><a href="{% url 'app:delete_income_transaction' transaction.id %}">delete</a></td>
+        <td><a href="{% url 'app:edit_income' transaction.id %}">edit</a></td>
+        <td><a href="{% url 'app:delete_income' transaction.id %}">delete</a></td>
     </tr>
     {% endfor %}
 </table>
@@ -108,8 +108,8 @@
         <td>{{ transaction.comment }}</td>
         <td>{{ transaction.account }}</td>
         <td>{{ transaction.subcategory }}</td>
-        <td><a href="{% url 'app:edit_expense_transaction' transaction.id %}">edit</a></td>
-        <td><a href="{% url 'app:delete_expense_transaction' transaction.id %}">delete</a></td>
+        <td><a href="{% url 'app:edit_expense' transaction.id %}">edit</a></td>
+        <td><a href="{% url 'app:delete_expense' transaction.id %}">delete</a></td>
     </tr>
     {% endfor %}
 </table>
@@ -132,8 +132,8 @@
         <td>{{ transfer.comment }}</td>
         <td>{{ transfer.from_account }}</td>
         <td>{{ transfer.to_account }}</td>
-        <td><a href="{% url 'app:edit_transfer_transaction' transfer.id %}">edit</a></td>
-        <td><a href="{% url 'app:delete_transfer_transaction' transfer.id %}">delete</a></td>
+        <td><a href="{% url 'app:edit_transfer' transfer.id %}">edit</a></td>
+        <td><a href="{% url 'app:delete_transfer' transfer.id %}">delete</a></td>
     </tr>
     {% endfor %}
 </table>

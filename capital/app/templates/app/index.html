@@ -5,14 +5,34 @@
 
 <p>Welcome {{ username }}</p>
 
-<a href="{% url 'app:expense' %}">Add expense</a>
+<a href="{% url 'app:add_expense' %}">Add expense</a>
 <br>
-<a href="{% url 'app:income' %}">Add income</a>
+<a href="{% url 'app:add_income' %}">Add income</a>
 <br>
-<a href="{% url 'app:transfer' %}">Transfer</a>
+<a href="{% url 'app:add_transfer' %}">Transfer</a>
+<br>
+<a href="{% url 'app:add_account' %}">Add account</a>
 <br>
 
-<a href="{% url 'app:accounts' %}">Accounts</a>
+<h3>Accounts:</h3>
+<table>
+    <tr>
+        <th>Account</th>
+        <th>Balance</th>
+    </tr>
+    {% for account, balance in accounts %}
+    <tr>
+        <td>{{ account }}</td>
+        <td>{{ balance  }}</td>
+        <td><a href="{% url 'app:edit_account' account.id %}">edit</a></td>
+        <td><a href="{% url 'app:delete_account' account.id %}">delete</a></td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td><b>Total</b></td>
+        <td>{{ total_balance }}</td>
+    </tr>
+</table>
 <br>
 
 <a href="{% url 'app:current' %}">This month</a>

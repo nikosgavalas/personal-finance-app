@@ -10,3 +10,6 @@
    - Add/update/delete entry
    - Reference entry from transaction
 6. Output aggregates/insights/charts
+
+## Notes to self
+- https://docs.djangoproject.com/en/3.0/topics/auth/default/#the-login-required-decorator
