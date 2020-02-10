@@ -1,7 +1,7 @@
-{% include "./base.html" %}
+{% extends "./base.html" %}
 
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'app/main.css' %}">
+
+{% block content %}
 
 <p>Welcome {{ username }}</p>
 
@@ -47,3 +47,6 @@
 <br>
 
 <a href="{% url 'app:logout' %}">Logout</a>
+
+
+{% endblock %}
