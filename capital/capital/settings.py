@@ -25,7 +25,8 @@ SECRET_KEY = 'scukbm321^z1(a6)%*(9#okh4jc)lruy-irrphbk)w1zbwv#i1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Add wildcard to allow for remote development here.
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

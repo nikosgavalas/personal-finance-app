@@ -1,52 +1,43 @@
 {% extends "./base.html" %}
 
-
 {% block content %}
 
-<p>Welcome {{ username }}</p>
+<p>Welcome {{ username }}!</p>
 
-<a href="{% url 'app:add_expense' %}">Add expense</a>
-<br>
-<a href="{% url 'app:add_income' %}">Add income</a>
-<br>
-<a href="{% url 'app:add_transfer' %}">Transfer</a>
-<br>
-<a href="{% url 'app:add_account' %}">Add account</a>
-<br>
+{% if accounts %}
+<div class="row">
+    <div class="col-md-4">
+        <table class="table table-striped table-bordered table-hover">
+            <caption>Your accounts</caption>
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                </tr>
+            <thead>
+            <tbody>
+                {% for account, balance in accounts %}
+                <tr>
+                    <td>{{ account }}</td>
+                    <td>{{ balance  }}</td>
+                    <td><a href="{% url 'app:edit_account' account.id %}">edit</a> <a href="{% url 'app:delete_account' account.id %}">delete</a></td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td><b>Total</b></td>
+                    <td>{{ total_balance }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<p>You have no accounts in your profile. <a href="{% url 'app:add_account' %}">Create one to get started.</a></p>
+{% endif %}
 
-<h3>Accounts:</h3>
-<table>
-    <tr>
-        <th>Account</th>
-        <th>Balance</th>
-    </tr>
-    {% for account, balance in accounts %}
-    <tr>
-        <td>{{ account }}</td>
-        <td>{{ balance  }}</td>
-        <td><a href="{% url 'app:edit_account' account.id %}">edit</a></td>
-        <td><a href="{% url 'app:delete_account' account.id %}">delete</a></td>
-    </tr>
-    {% endfor %}
-    <tr>
-        <td><b>Total</b></td>
-        <td>{{ total_balance }}</td>
-    </tr>
-</table>
-<br>
-
-<a href="{% url 'app:current' %}">This month</a>
-<br>
-
-<p>Months available:</p>
-<ul>
-{% for year, month in months_available %}
-<li><a href="{% url 'app:index' %}{{ year }}/{{ month }} ">{{ year }} - {{ month }}</a></li>
-{% endfor %}
-</ul>
 <br>
 
-<a href="{% url 'app:logout' %}">Logout</a>
-
+TODO: add charts here (line plots with trendlines for each account and total, pie charts for expenses and income per category)
 
 {% endblock %}

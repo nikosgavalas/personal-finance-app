@@ -3,3 +3,7 @@
     --green: #23a565;
     --light-green: #8ed1b0;
 }
+
+.navbar {
+    margin-bottom: 10px;
+}

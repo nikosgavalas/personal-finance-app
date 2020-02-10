@@ -75,15 +75,39 @@ def index(req):
     income_date_max = IncomeTransaction.objects.filter(user=user).aggregate(Max('date'))['date__max']
     expense_date_min = ExpenseTransaction.objects.filter(user=user).aggregate(Min('date'))['date__min']
     expense_date_max = ExpenseTransaction.objects.filter(user=user).aggregate(Max('date'))['date__max']
-
+    # Ta xw kanei poutana edw FIXME
     months_available = []
-    if income_date_min is not None and income_date_max is not None and expense_date_min is not None and expense_date_max is not None:
+    if income_date_min and not expense_date_min:
+        min_date = income_date_min
+        max_date = income_date_max
+        if min_date == max_date:
+            months_available = [(min_date.strftime(r"%Y-%m"), None)]
+        else:
+            months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime(r"%Y-%m"), None) for _ in range((max_date - min_date).days)).keys()
+            months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
+            months_available.reverse()
+
+    elif not income_date_min and expense_date_min:
+        min_date = expense_date_min
+        max_date = expense_date_max
+        if min_date == max_date:
+            months_available = [(min_date.strftime(r"%Y-%m"), None)]
+        else:
+            months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime(r"%Y-%m"), None) for _ in range((max_date - min_date).days)).keys()
+            months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
+            months_available.reverse()
+
+    elif income_date_min and expense_date_min:
         min_date = min(income_date_min, expense_date_min)
         max_date = max(income_date_max, expense_date_max)
 
+    if min_date == max_date:
+        months_available_raw = [(min_date.strftime(r"%Y-%m"), None)]
+    else:
         months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime(r"%Y-%m"), None) for _ in range((max_date - min_date).days)).keys()
-        months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
-        months_available.reverse()
+
+    months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
+    months_available.reverse()
 
     accounts = [account for account in Account.objects.filter(user=user)]
     accounts_values = list(map(lambda acc: _get_account_value(user=user, account=acc), accounts))
@@ -91,7 +115,7 @@ def index(req):
     return render(req, 'app/index.html', {
         'username': req.user.username,
         'months_available': months_available,
-        'accounts': zip(accounts, accounts_values),
+        'accounts': list(zip(accounts, accounts_values)),
         'total_balance': sum(accounts_values)
     })
 

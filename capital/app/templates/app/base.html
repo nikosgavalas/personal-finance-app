@@ -15,7 +15,7 @@
   <body>
     
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">Personal Finance</a>
+      <a class="navbar-brand" href="{% url 'app:index' %}">Personal Finance</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -23,32 +23,34 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" href="#" id="addNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Add...
             </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Expense</a>
-              <a class="dropdown-item" href="#">Income</a>
-              <a class="dropdown-item" href="#">New Account</a>
+            <div class="dropdown-menu" aria-labelledby="addNavbarDropdown">
+              <a class="dropdown-item" href="{% url 'app:add_expense' %}">Expense</a>
+              <a class="dropdown-item" href="{% url 'app:add_income' %}">Income</a>
+              <a class="dropdown-item" href="{% url 'app:add_account' %}">New Account</a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Transfer Money</a>
+              <a class="dropdown-item" href="{% url 'app:add_transfer' %}">Transfer Money</a>
             </div>
           </li>
+          {% if months_available %}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="dropdown-menu" aria-labelledby="monthsNavbarDropdown">
+              <a class="dropdown-item" href="{% url 'app:current' %}">Current Month</a>
+              <div class="dropdown-divider"></div>
+              {% for year, month in months_available %}
+              <a class="dropdown-item" href="{% url 'app:index' %}{{ year }}/{{ month }} ">{{ year }} - {{ month }}</a>
+              {% endfor %}
+            </div>
+            <a class="nav-link dropdown-toggle" href="#" id="monthsNavbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Monthly Insights
             </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Current Month</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Month 1</a>
-              <a class="dropdown-item" href="#">Month 2</a>
-              <a class="dropdown-item" href="#">Month 3</a>
-            </div>
           </li>
+          {% endif %}
         </ul>
         <form class="form-inline my-2 my-lg-0">
-          <a class="btn btn-outline-success" href="#">Login</a>
+          <a class="btn btn-outline-success" href="{% url 'app:logout' %}">Logout</a>
         </form>
       </div>
     </nav>
