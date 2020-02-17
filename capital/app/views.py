@@ -4,7 +4,8 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.db.models import Sum, Min, Max
-from django.forms import ModelForm
+from django import forms
+from django.contrib.admin.widgets import AdminDateWidget
 
 import datetime
 from calendar import monthrange
@@ -13,7 +14,7 @@ from collections import OrderedDict
 from .models import *
 
 
-class IncomeTransactionForm(ModelForm):
+class IncomeTransactionForm(forms.ModelForm):
     def __init__(self, user, *args,**kwargs):
         super(IncomeTransactionForm, self).__init__(*args, **kwargs)
         self.fields['account'].queryset = Account.objects.filter(user=user)
@@ -23,7 +24,7 @@ class IncomeTransactionForm(ModelForm):
         fields = ['date', 'value', 'comment', 'account', 'subcategory']
 
 
-class ExpenseTransactionForm(ModelForm):
+class ExpenseTransactionForm(forms.ModelForm):
     def __init__(self, user, *args,**kwargs):
         super(ExpenseTransactionForm, self).__init__(*args, **kwargs)
         self.fields['account'].queryset = Account.objects.filter(user=user)
@@ -33,7 +34,7 @@ class ExpenseTransactionForm(ModelForm):
         fields = ['date', 'value', 'comment', 'account', 'subcategory']
 
 
-class TransferTransactionForm(ModelForm):
+class TransferTransactionForm(forms.ModelForm):
     def __init__(self, user, *args,**kwargs):
         super(TransferTransactionForm, self).__init__(*args, **kwargs)
         self.fields['from_account'].queryset = Account.objects.filter(user=user)
@@ -44,7 +45,7 @@ class TransferTransactionForm(ModelForm):
         fields = ['date', 'value', 'comment', 'from_account', 'to_account']
 
 
-class AccountForm(ModelForm):
+class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
         fields = ['name', 'init_balance']
@@ -67,54 +68,45 @@ def _get_account_value(user, account, start_date=datetime.date(1995, 8, 19), end
                 - _clean_value(transfers_out), 2)
 
 
-@login_required
-def index(req):
-    user = req.user
-
+def _get_available_months(user):
     income_date_min = IncomeTransaction.objects.filter(user=user).aggregate(Min('date'))['date__min']
     income_date_max = IncomeTransaction.objects.filter(user=user).aggregate(Max('date'))['date__max']
     expense_date_min = ExpenseTransaction.objects.filter(user=user).aggregate(Min('date'))['date__min']
     expense_date_max = ExpenseTransaction.objects.filter(user=user).aggregate(Max('date'))['date__max']
-    # Ta xw kanei poutana edw FIXME
+
     months_available = []
-    if income_date_min and not expense_date_min:
-        min_date = income_date_min
-        max_date = income_date_max
+
+    if income_date_min or expense_date_min:
+        if income_date_min and expense_date_min:
+            min_date = min(income_date_min, expense_date_min)
+            max_date = max(income_date_max, expense_date_max)
+        elif income_date_min and not expense_date_min:
+            min_date = income_date_min
+            max_date = income_date_max
+        elif not income_date_min and expense_date_min:
+            min_date = expense_date_min
+            max_date = expense_date_max
+
         if min_date == max_date:
-            months_available = [(min_date.strftime(r"%Y-%m"), None)]
+            months_available = [(str(min_date.year), str(min_date.month))]
         else:
-            months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime(r"%Y-%m"), None) for _ in range((max_date - min_date).days)).keys()
+            months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime('%Y-%m'), None) for _ in range((max_date - min_date).days)).keys()
             months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
             months_available.reverse()
+    
+    return months_available
 
-    elif not income_date_min and expense_date_min:
-        min_date = expense_date_min
-        max_date = expense_date_max
-        if min_date == max_date:
-            months_available = [(min_date.strftime(r"%Y-%m"), None)]
-        else:
-            months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime(r"%Y-%m"), None) for _ in range((max_date - min_date).days)).keys()
-            months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
-            months_available.reverse()
 
-    elif income_date_min and expense_date_min:
-        min_date = min(income_date_min, expense_date_min)
-        max_date = max(income_date_max, expense_date_max)
-
-    if min_date == max_date:
-        months_available_raw = [(min_date.strftime(r"%Y-%m"), None)]
-    else:
-        months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime(r"%Y-%m"), None) for _ in range((max_date - min_date).days)).keys()
-
-    months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
-    months_available.reverse()
+@login_required
+def index(req):
+    user = req.user
 
     accounts = [account for account in Account.objects.filter(user=user)]
     accounts_values = list(map(lambda acc: _get_account_value(user=user, account=acc), accounts))
 
     return render(req, 'app/index.html', {
         'username': req.user.username,
-        'months_available': months_available,
+        'months_available': _get_available_months(user),
         'accounts': list(zip(accounts, accounts_values)),
         'total_balance': sum(accounts_values)
     })
@@ -135,10 +127,13 @@ def month(req, year, month):
 
     return render(req, 'app/month.html', {
         'income': income,
+        # TODO add this months_available as context
+        'months_available': _get_available_months(user),
         'total_income': _clean_value(sum([item for sublist in [value.values() for value in income.values()] for item in sublist])),
         'expenses': expenses,
         'total_expenses': _clean_value(sum([item for sublist in [value.values() for value in expenses.values()] for item in sublist])),
         'status_of_accounts': status_of_accounts,
+        # TODO sort the transactions by date
         'income_transactions': IncomeTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date),
         'expense_transactions': ExpenseTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date),
         'transfers': TransferTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date),

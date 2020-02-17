@@ -1,132 +1,120 @@
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'app/main.css' %}">
+{% extends "./base.html" %}
 
-<h3>This month:</h3>
+{% block content %}
 
-<h4>Expenses</h4>
+<a class="btn btn-outline-success" href="{% url 'app:index' %}" style="margin-bottom: 20px;">Back</a>
 
-<table>
-    <tr>
+<div class="row">
+  <div class="col-md-6">
+    <h4>Expenses</h4>
+    <table class="table table-striped table-bordered table-hover">
+      <tr>
         <th>Category</th>
         <th>Subcategory</th>
         <th>Value</th>
-    </tr>
-    {% for category, subcategory in expenses.items %}
-    {% for subcat_name, value in subcategory.items %}
-    <tr>
+      </tr>
+      {% for category, subcategory in expenses.items %}
+      {% for subcat_name, value in subcategory.items %}
+      <tr>
         <td>{{ category }}</td>
         <td>{{ subcat_name }}</td>
         <td>{{ value }}</td>
-    </tr>
-    {% endfor %}
-    {% endfor %}
-    <tr>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+      <tr>
         <td>Total</td>
         <td></td>
         <td>{{ total_expenses }}</td>
-    </tr>
-</table>
+      </tr>
+    </table>
+  </div>
 
-<h4>Income</h4>
-
-<table>
-    <tr>
+  <div class="col-md-6">
+    <h4>Income</h4>
+    <table class="table table-striped table-bordered table-hover">
+      <tr>
         <th>Category</th>
         <th>Subcategory</th>
         <th>Value</th>
-    </tr>
-    {% for category, subcategory in income.items %}
-    {% for subcat_name, value in subcategory.items %}
-    <tr>
+      </tr>
+      {% for category, subcategory in income.items %}
+      {% for subcat_name, value in subcategory.items %}
+      <tr>
         <td>{{ category }}</td>
         <td>{{ subcat_name }}</td>
         <td>{{ value }}</td>
-    </tr>
-    {% endfor %}
-    {% endfor %}
-    <tr>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+      <tr>
         <td>Total</td>
         <td></td>
         <td>{{ total_income }}</td>
-    </tr>
-</table>
+      </tr>
+    </table>
+  </div>
+</div>
 
-<h4>Accounts</h4>
-
-<table>
-    <tr>
-        <th>Account</th>
-        <th>Balance at begining of month</th>
-        <th>Balance at end of month</th>
-    </tr>
-    {% for account, status in status_of_accounts.items %}
-    <tr>
-        <td>{{ account }}</td>
-        <td>{{ status.0 }}</td>
-        <td>{{ status.1 }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<h4>Income Transactions</h4>
-
-<table>
-    <tr>
+<div class="row">
+  <div class="col-md-4">
+    <h4>Expense Transactions</h4>
+    <table class="table table-striped table-bordered table-hover">
+      <tr>
         <th>Date</th>
         <th>Value</th>
         <th>Comment</th>
         <th>Account</th>
         <th>Subcategory</th>
-    </tr>
-    {% for transaction in income_transactions %}
-    <tr>
+        <th>Actions</th>
+      </tr>
+      {% for transaction in expense_transactions %}
+      <tr>
         <td>{{ transaction.date.year }}-{{ transaction.date.month }}-{{ transaction.date.day }}</td>
         <td>{{ transaction.value }}</td>
         <td>{{ transaction.comment }}</td>
         <td>{{ transaction.account }}</td>
         <td>{{ transaction.subcategory }}</td>
-        <td><a href="{% url 'app:edit_income' transaction.id %}">edit</a></td>
-        <td><a href="{% url 'app:delete_income' transaction.id %}">delete</a></td>
-    </tr>
-    {% endfor %}
-</table>
-
-<h4>Expense Transactions</h4>
-
-<table>
-    <tr>
+        <td><a href="{% url 'app:edit_expense' transaction.id %}">edit</a> <a href="{% url 'app:delete_expense' transaction.id %}">delete</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="col-md-4">
+    <h4>Income Transactions</h4>
+    <table class="table table-striped table-bordered table-hover">
+      <tr>
         <th>Date</th>
         <th>Value</th>
         <th>Comment</th>
         <th>Account</th>
         <th>Subcategory</th>
-    </tr>
-    {% for transaction in expense_transactions %}
-    <tr>
+        <th>Actions</th>
+      </tr>
+      {% for transaction in income_transactions %}
+      <tr>
         <td>{{ transaction.date.year }}-{{ transaction.date.month }}-{{ transaction.date.day }}</td>
         <td>{{ transaction.value }}</td>
         <td>{{ transaction.comment }}</td>
         <td>{{ transaction.account }}</td>
         <td>{{ transaction.subcategory }}</td>
-        <td><a href="{% url 'app:edit_expense' transaction.id %}">edit</a></td>
-        <td><a href="{% url 'app:delete_expense' transaction.id %}">delete</a></td>
-    </tr>
-    {% endfor %}
-</table>
-
-{% if transfers %}
-<h4>Tranfer Transactions</h4>
-
-<table>
-    <tr>
+        <td><a href="{% url 'app:edit_income' transaction.id %}">edit</a> <a href="{% url 'app:delete_income' transaction.id %}">delete</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="col-md-4">
+    <h4>Tranfer Transactions</h4>
+    <table class="table table-striped table-bordered table-hover">
+      <tr>
         <th>Date</th>
         <th>Value</th>
         <th>Comment</th>
         <th>From</th>
         <th>To</th>
-    </tr>
-    {% for transfer in transfers %}
-    <tr>
+      </tr>
+      {% for transfer in transfers %}
+      <tr>
         <td>{{ transfer.date.year }}-{{ transfer.date.month }}-{{ transfer.date.day }}</td>
         <td>{{ transfer.value }}</td>
         <td>{{ transfer.comment }}</td>
@@ -134,11 +122,34 @@
         <td>{{ transfer.to_account }}</td>
         <td><a href="{% url 'app:edit_transfer' transfer.id %}">edit</a></td>
         <td><a href="{% url 'app:delete_transfer' transfer.id %}">delete</a></td>
-    </tr>
-    {% endfor %}
-</table>
-{% endif %}
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
 
-TODO: add bar chart (income, expenses)
+<div class="row">
+  <div class="col-md-6">
+    <h4>Accounts</h4>
+    <table class="table table-striped table-bordered table-hover">
+      <tr>
+        <th>Account</th>
+        <th>Balance at begining of month</th>
+        <th>Balance at end of month</th>
+      </tr>
+      {% for account, status in status_of_accounts.items %}
+      <tr>
+        <td>{{ account }}</td>
+        <td>{{ status.0 }}</td>
+        <td>{{ status.1 }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
 
-<a href="{% url 'app:index' %}">Back</a>
+TODO: add bar chart (income, expenses) <br>
+
+<a class="btn btn-outline-success" href="{% url 'app:index' %}" style="margin-bottom: 20px;">Back</a>
+
+{% endblock content %}

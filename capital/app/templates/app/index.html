@@ -6,31 +6,31 @@
 
 {% if accounts %}
 <div class="row">
-    <div class="col-md-4">
-        <table class="table table-striped table-bordered table-hover">
-            <caption>Your accounts</caption>
-            <thead>
-                <tr>
-                    <th>Account</th>
-                    <th>Balance</th>
-                    <th>Actions</th>
-                </tr>
-            <thead>
-            <tbody>
-                {% for account, balance in accounts %}
-                <tr>
-                    <td>{{ account }}</td>
-                    <td>{{ balance  }}</td>
-                    <td><a href="{% url 'app:edit_account' account.id %}">edit</a> <a href="{% url 'app:delete_account' account.id %}">delete</a></td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <td><b>Total</b></td>
-                    <td>{{ total_balance }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+  <div class="col-md-4">
+    <table class="table table-striped table-bordered table-hover">
+      <caption>Your accounts</caption>
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Balance</th>
+          <th>Actions</th>
+        </tr>
+      <thead>
+      <tbody>
+        {% for account, balance in accounts %}
+        <tr>
+          <td>{{ account }}</td>
+          <td>{{ balance  }}</td>
+          <td><a href="{% url 'app:edit_account' account.id %}">edit</a> <a href="{% url 'app:delete_account' account.id %}">delete</a></td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td><b>Total</b></td>
+          <td>{{ total_balance }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 {% else %}
 <p>You have no accounts in your profile. <a href="{% url 'app:add_account' %}">Create one to get started.</a></p>
