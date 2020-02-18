@@ -20,14 +20,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open('/etc/secret_key') as f:
+with open('/etc/secret.key') as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 # Add wildcard to allow for remote development here.
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['home.nickgavalas.com']
 
 
 # Application definition
@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'capital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, '../prod_db.sqlite3'),
+        'NAME': '/srv/db/prod.sqlite3',
     }
 }
 

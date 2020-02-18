@@ -12,4 +12,11 @@
 6. Output aggregates/insights/charts
 
 ## Notes to self
+#### General
 - https://docs.djangoproject.com/en/3.0/topics/auth/default/#the-login-required-decorator
+
+#### Deployment
+- https://docs.djangoproject.com/en/3.0/howto/deployment/
+- https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/modwsgi/
+- https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+
