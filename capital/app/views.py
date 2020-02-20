@@ -15,31 +15,18 @@ from .models import *
 
 
 class IncomeTransactionForm(forms.ModelForm):
-    def __init__(self, user, *args,**kwargs):
-        super(IncomeTransactionForm, self).__init__(*args, **kwargs)
-        self.fields['account'].queryset = Account.objects.filter(user=user)
-
     class Meta:
         model = IncomeTransaction
         fields = ['date', 'value', 'comment', 'account', 'subcategory']
 
 
 class ExpenseTransactionForm(forms.ModelForm):
-    def __init__(self, user, *args,**kwargs):
-        super(ExpenseTransactionForm, self).__init__(*args, **kwargs)
-        self.fields['account'].queryset = Account.objects.filter(user=user)
-
     class Meta:
         model = ExpenseTransaction
         fields = ['date', 'value', 'comment', 'account', 'subcategory']
 
 
 class TransferTransactionForm(forms.ModelForm):
-    def __init__(self, user, *args,**kwargs):
-        super(TransferTransactionForm, self).__init__(*args, **kwargs)
-        self.fields['from_account'].queryset = Account.objects.filter(user=user)
-        self.fields['to_account'].queryset = Account.objects.filter(user=user)
-
     class Meta:
         model = TransferTransaction
         fields = ['date', 'value', 'comment', 'from_account', 'to_account']
@@ -153,34 +140,44 @@ def add_account(req):
 
 @login_required
 def add_expense_transaction(req):
-    form = ExpenseTransactionForm(req.user, req.POST or None)
-    if form.is_valid():
-        f = form.save(commit=False)
-        f.user = req.user
-        f.save()
-        return redirect('app:index')
+    if req.method == 'POST':
+        form = ExpenseTransactionForm(req.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.user = req.user
+            f.save()
+            return redirect('app:index')
+    form = ExpenseTransactionForm()
+    form.fields['account'].queryset = Account.objects.filter(user=req.user)
     return render(req, 'app/form.html', {'form': form})
 
 
 @login_required
 def add_income_transaction(req):
-    form = IncomeTransactionForm(req.user, req.POST or None)
-    if form.is_valid():
-        f = form.save(commit=False)
-        f.user = req.user
-        f.save()
-        return redirect('app:index')
+    if req.method == 'POST':
+        form = IncomeTransactionForm(req.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.user = req.user
+            f.save()
+            return redirect('app:index')
+    form = IncomeTransactionForm()
+    form.fields['account'].queryset = Account.objects.filter(user=req.user)
     return render(req, 'app/form.html', {'form': form})
 
 
 @login_required
 def add_transfer_transaction(req):
-    form = TransferTransactionForm(req.user, req.POST or None)
-    if form.is_valid():
-        f = form.save(commit=False)
-        f.user = req.user
-        f.save()
-        return redirect('app:index')
+    if req.method == 'POST':
+        form = TransferTransactionForm(req.POST)
+        if form.is_valid():
+            f = form.save(commit=False)
+            f.user = req.user
+            f.save()
+            return redirect('app:index')
+    form = TransferTransactionForm()
+    form.fields['from_account'].queryset = Account.objects.filter(user=req.user)
+    form.fields['to_account'].queryset = Account.objects.filter(user=req.user)
     return render(req, 'app/form.html', {'form': form})
 
 
@@ -196,31 +193,39 @@ def edit_account(req, pk):
 
 @login_required
 def edit_expense_transaction(req, pk):
+    # can a user edit another user's transaction? or change transaction's account to an account that belongs to a different user?
     transaction = get_object_or_404(ExpenseTransaction, pk=pk, user=req.user)
-    form = ExpenseTransactionForm(req.POST or None, instance=transaction)
-    if form.is_valid():
+    if req.method == 'POST':
+        form = ExpenseTransactionForm(req.POST, instance=transaction)
         form.save()
         return redirect('app:index')
+    form = ExpenseTransactionForm(instance=transaction)
+    form.fields['account'].queryset = Account.objects.filter(user=req.user)
     return render(req, 'app/form.html', {'form':form})
 
 
 @login_required
 def edit_income_transaction(req, pk):
     transaction = get_object_or_404(IncomeTransaction, pk=pk, user=req.user)
-    form = IncomeTransactionForm(req.POST or None, instance=transaction)
-    if form.is_valid():
+    if req.method == 'POST':
+        form = IncomeTransactionForm(req.POST, instance=transaction)
         form.save()
         return redirect('app:index')
+    form = IncomeTransactionForm(instance=transaction)
+    form.fields['account'].queryset = Account.objects.filter(user=req.user)
     return render(req, 'app/form.html', {'form':form})
 
 
 @login_required
 def edit_transfer_transaction(req, pk):
     transaction = get_object_or_404(TransferTransaction, pk=pk, user=req.user)
-    form = TransferTransactionForm(req.POST or None, instance=transaction)
-    if form.is_valid():
+    if req.method == 'POST':
+        form = TransferTransactionForm(req.POST, instance=transaction)
         form.save()
         return redirect('app:index')
+    form = TransferTransactionForm(instance=transaction)
+    form.fields['from_account'].queryset = Account.objects.filter(user=req.user)
+    form.fields['to_account'].queryset = Account.objects.filter(user=req.user)
     return render(req, 'app/form.html', {'form':form})
 
 

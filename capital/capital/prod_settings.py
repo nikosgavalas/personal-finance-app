@@ -26,8 +26,7 @@ with open('/etc/secret.key') as f:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-# Add wildcard to allow for remote development here.
-ALLOWED_HOSTS = ['home.nickgavalas.com']
+ALLOWED_HOSTS = ['home.nickgavalas.com', '192.168.2.2']
 
 
 # Application definition
