@@ -6,12 +6,19 @@ from django.contrib import auth
 from django.db.models import Sum, Min, Max
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
+from django.template.defaulttags import register
 
 import datetime
 from calendar import monthrange
 from collections import OrderedDict
 
 from .models import *
+
+
+@register.filter
+def get_item(dictionary, key):
+    ret = dictionary.get(key)
+    return 0.0 if not ret else ret
 
 
 class IncomeTransactionForm(forms.ModelForm):
@@ -53,6 +60,44 @@ def _get_account_value(user, account, start_date=datetime.date(1995, 8, 19), end
                 - _clean_value(transactions_out)
                 + _clean_value(transfers_in)
                 - _clean_value(transfers_out), 2)
+
+
+def _get_total_values_for_expense_categories(user, start_date=datetime.date(1995, 8, 19), end_date=datetime.date(2100, 1, 1)):
+    queryset = ExpenseTransaction.objects.raw('''
+        SELECT c.id, c.name, sum(t.value) AS total
+        FROM app_expensetransaction AS t
+        INNER JOIN app_expensesubcategory AS s
+        ON t.subcategory_id = s.id
+        INNER JOIN app_expensecategory AS c
+        ON s.category_id = c.id
+        WHERE t.date >= %s
+        AND t.date <= %s
+        AND t.user_id = %s
+        GROUP BY c.name;
+        ''', [start_date, end_date, user.id])
+    ret = {}
+    for i in queryset:
+        ret[i.name] = _clean_value(i.total)
+    return ret
+
+
+def _get_total_values_for_income_categories(user, start_date=datetime.date(1995, 8, 19), end_date=datetime.date(2100, 1, 1)):
+    queryset = IncomeTransaction.objects.raw('''
+        SELECT c.id, c.name, sum(t.value) AS total
+        FROM app_incometransaction AS t
+        INNER JOIN app_incomesubcategory AS s
+        ON t.subcategory_id = s.id
+        INNER JOIN app_incomecategory AS c
+        ON s.category_id = c.id
+        WHERE t.date >= %s
+        AND t.date <= %s
+        AND t.user_id = %s
+        GROUP BY c.name;
+        ''', [start_date, end_date, user.id])
+    ret = {}
+    for i in queryset:
+        ret[i.name] = _clean_value(i.total)
+    return ret
 
 
 def _get_available_months(user):
@@ -107,23 +152,39 @@ def month(req, year, month):
     end_of_target_month = monthrange(year, month)[1]
     end_date = datetime.date(year, month, end_of_target_month)
 
-    income = {category.name: {subcategory.name: _clean_value(IncomeTransaction.objects.filter(user=user, subcategory=subcategory, date__gte=start_date, date__lte=end_date).aggregate(Sum('value'))['value__sum']) for subcategory in category.incomesubcategory_set.all()} for category in IncomeCategory.objects.all()}
-    expenses = {category.name: {subcategory.name: _clean_value(ExpenseTransaction.objects.filter(user=user, subcategory=subcategory, date__gte=start_date, date__lte=end_date).aggregate(Sum('value'))['value__sum'])  for subcategory in category.expensesubcategory_set.all()} for category in ExpenseCategory.objects.all()}
+    # TODO replace these with raw query to avoid hitting the database multiple times for a single operation
+    income = {
+        category.name: {
+            subcategory.name: _clean_value(IncomeTransaction.objects.filter(user=user, subcategory=subcategory, date__gte=start_date, date__lte=end_date).aggregate(Sum('value'))['value__sum']) for subcategory in category.incomesubcategory_set.all()
+        } for category in IncomeCategory.objects.all()
+    }
+    expenses = {
+        category.name: {
+            subcategory.name: _clean_value(ExpenseTransaction.objects.filter(user=user, subcategory=subcategory, date__gte=start_date, date__lte=end_date).aggregate(Sum('value'))['value__sum']) for subcategory in category.expensesubcategory_set.all()
+        } for category in ExpenseCategory.objects.all()
+    }
 
-    status_of_accounts = {account.name: (_get_account_value(user=user, account=account, end_date=start_date), _get_account_value(user=user, account=account, end_date=end_date)) for account in Account.objects.filter(user=user)}
+    status_of_accounts = {
+        account.name: (_get_account_value(user=user, account=account, end_date=start_date), _get_account_value(user=user, account=account, end_date=end_date)) for account in Account.objects.filter(user=user)
+    }
 
     return render(req, 'app/month.html', {
-        'income': income,
         # TODO add this months_available as context
         'months_available': _get_available_months(user),
+        
+        'income': income,
+        'income_aggregates': _get_total_values_for_income_categories(user, start_date=start_date, end_date=end_date),
         'total_income': _clean_value(sum([item for sublist in [value.values() for value in income.values()] for item in sublist])),
+        
         'expenses': expenses,
+        'expenses_aggregates': _get_total_values_for_expense_categories(user, start_date=start_date, end_date=end_date),
         'total_expenses': _clean_value(sum([item for sublist in [value.values() for value in expenses.values()] for item in sublist])),
+
+        'income_transactions': IncomeTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date).order_by('-date'),
+        'expense_transactions': ExpenseTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date).order_by('-date'),
+        'transfers': TransferTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date).order_by('-date'),
+        
         'status_of_accounts': status_of_accounts,
-        # TODO sort the transactions by date
-        'income_transactions': IncomeTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date),
-        'expense_transactions': ExpenseTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date),
-        'transfers': TransferTransaction.objects.filter(user=user, date__gte=start_date, date__lte=end_date),
     })
 
 
@@ -265,8 +326,11 @@ def delete_transfer_transaction(req, pk):
     return render(req, 'app/confirm_delete.html', {'object': transaction})
 
 
+@login_required
 def test(req):
-    return render(req, 'app/test.html', {})
+    ret = {}
+    print(ret)
+    return render(req, 'app/test.html', {'ret': ret})
 
 
 @login_required

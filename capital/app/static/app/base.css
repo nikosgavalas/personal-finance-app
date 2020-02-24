@@ -7,3 +7,9 @@
 .navbar {
     margin-bottom: 10px;
 }
+
+.fa {
+    color: gray;
+    scale: 1.4;
+    padding: 6px;
+}
