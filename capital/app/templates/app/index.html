@@ -6,35 +6,35 @@
 
 {% if accounts %}
 <div class="row">
-  <div class="col-md-4">
-    <table class="table table-striped table-bordered table-hover">
-      <caption>Your accounts</caption>
-      <thead>
-      <tr>
-        <th>Account</th>
-        <th>Balance</th>
-        <th>Actions</th>
-      </tr>
-      <thead>
-      <tbody>
-      {% for account, balance in accounts %}
-      <tr>
-        <td>{{ account }}</td>
-        <td>{{ balance  }}</td>
-        <td><a href="{% url 'app:edit_account' account.id %}">edit</a> <a href="{% url 'app:delete_account' account.id %}">delete</a></td>
-      </tr>
-      {% endfor %}
-      <tr>
-        <td><b>Total</b></td>
-        <td>{{ total_balance }}</td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="col-md-8">
-	  <canvas id="lineChart"></canvas>
-  </div>
+  <table class="table">
+    <caption>Your accounts</caption>
+    <thead>
+    <tr>
+      <th>Account</th>
+      <th>Balance</th>
+      <th>Actions</th>
+    </tr>
+    <thead>
+    <tbody>
+    {% for account, balance in accounts %}
+    <tr>
+      <td>{{ account }}</td>
+      <td>{{ balance  }}</td>
+      <td><a href="{% url 'app:edit_account' account.id %}"><i class="fa fa-edit"></i></a> <a href="{% url 'app:delete_account' account.id %}"><i class="fa fa-trash"></i></a></td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td><b>Total</b></td>
+      <td><b>{{ total_balance }}</b></td>
+      <td></td>
+    </tr>
+    </tbody>
+  </table>
 </div>
+<div class="row">
+  <canvas id="lineChart"></canvas>
+</div>
+
 {% else %}
 <p>You have no accounts in your profile. <a href="{% url 'app:add_account' %}">Create one to get started.</a></p>
 {% endif %}
@@ -47,26 +47,34 @@
 	var config = {
 		type: 'line',
 		data: {
-			labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-			datasets: [{
-				label: 'My First dataset',
-				backgroundColor: 'red',
-				borderColor: 'red',
-				data: [1, 2, 3, 2.2, 12, 6.3, 7],
+			labels: [
+				{% for year, month in months_available %}
+				'{{ year }} - {{ month }}',
+				{% endfor %}
+			],
+			datasets: [
+			{% for account in accounts_chart %}
+			{
+				{% autoescape off %}
+				label: "{{ account.name }}",
+				{% endautoescape %}
+				backgroundColor: '{{ account.color }}',
+				borderColor: '{{ account.color }}',
 				fill: false,
-			}, {
-				label: 'My Second dataset',
-				fill: false,
-				backgroundColor: 'blue',
-				borderColor: 'blue',
-				data: [1.7, 1.2, 3, -2, 5, 6.5, 7],
-			}]
+				data: [
+					{% for balance in account.balances %}
+					{{ balance }},
+					{% endfor %}
+				]
+			},
+			{% endfor %}
+			]
 		},
 		options: {
 			responsive: true,
 			title: {
 				display: true,
-				text: 'Chart.js Line Chart'
+				text: 'Accounts Chart'
 			},
 			tooltips: {
 				mode: 'index',

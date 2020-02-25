@@ -9,6 +9,7 @@ from django.contrib.admin.widgets import AdminDateWidget
 from django.template.defaulttags import register
 
 import datetime
+import json
 from calendar import monthrange
 from collections import OrderedDict
 
@@ -21,22 +22,35 @@ def get_item(dictionary, key):
     return 0.0 if not ret else ret
 
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
 class IncomeTransactionForm(forms.ModelForm):
     class Meta:
         model = IncomeTransaction
         fields = ['date', 'value', 'comment', 'account', 'subcategory']
+        widgets = {
+            'date': DateInput(),
+        }
 
 
 class ExpenseTransactionForm(forms.ModelForm):
     class Meta:
         model = ExpenseTransaction
         fields = ['date', 'value', 'comment', 'account', 'subcategory']
+        widgets = {
+            'date': DateInput(),
+        }
 
 
 class TransferTransactionForm(forms.ModelForm):
     class Meta:
         model = TransferTransaction
         fields = ['date', 'value', 'comment', 'from_account', 'to_account']
+        widgets = {
+            'date': DateInput(),
+        }
 
 
 class AccountForm(forms.ModelForm):
@@ -47,6 +61,11 @@ class AccountForm(forms.ModelForm):
 
 def _clean_value(res):
     return 0.0 if res is None else round(res, 2)
+
+def _end_of_month(year, month):
+    start_date = datetime.date(year, month, 1)
+    end_of_target_month = monthrange(year, month)[1]
+    return datetime.date(year, month, end_of_target_month)
 
 
 def _get_account_value(user, account, start_date=datetime.date(1995, 8, 19), end_date=datetime.date(2100, 1, 1)):
@@ -124,8 +143,7 @@ def _get_available_months(user):
         else:
             months_available_raw = OrderedDict(((min_date + datetime.timedelta(_)).strftime('%Y-%m'), None) for _ in range((max_date - min_date).days)).keys()
             months_available = list(map(lambda x: (x.split('-')[0], x.split('-')[1]), list(months_available_raw)))
-            months_available.reverse()
-    
+
     return months_available
 
 
@@ -136,11 +154,25 @@ def index(req):
     accounts = [account for account in Account.objects.filter(user=user)]
     accounts_values = list(map(lambda acc: _get_account_value(user=user, account=acc), accounts))
 
+    months_available = _get_available_months(user)
+
+    end_dates = [_end_of_month(int(year), int(month)) for year, month in months_available]
+    accounts_chart = []
+    color = ['red', 'blue', 'green', 'purple', 'orange', 'yellow', 'brown', 'pink', 'black', 'gray', 'cyan']
+    for color_idx, acc in enumerate(accounts):
+        d = {
+            'name': acc.name,
+            'color': color[color_idx], # BUG when color_idx > len(color)... add seed based random color generation after a certain point?
+        }
+        d['balances'] = [_get_account_value(user=user, account=acc, end_date=end_date) for end_date in end_dates]
+        accounts_chart.append(d)
+
     return render(req, 'app/index.html', {
         'username': req.user.username,
-        'months_available': _get_available_months(user),
+        'months_available': months_available,
         'accounts': list(zip(accounts, accounts_values)),
-        'total_balance': sum(accounts_values)
+        'total_balance': sum(accounts_values),
+        'accounts_chart': accounts_chart,
     })
 
 
@@ -149,9 +181,8 @@ def month(req, year, month):
     user = req.user
 
     start_date = datetime.date(year, month, 1)
-    end_of_target_month = monthrange(year, month)[1]
-    end_date = datetime.date(year, month, end_of_target_month)
-
+    end_date = _end_of_month(year, month)
+    
     # TODO replace these with raw query to avoid hitting the database multiple times for a single operation
     income = {
         category.name: {

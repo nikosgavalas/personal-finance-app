@@ -45,7 +45,7 @@
             <div class="dropdown-menu" aria-labelledby="monthsNavbarDropdown">
               <a class="dropdown-item" href="{% url 'app:current' %}">Current Month</a>
               <div class="dropdown-divider"></div>
-              {% for year, month in months_available %}
+              {% for year, month in months_available reversed %}
               <a class="dropdown-item" href="{% url 'app:index' %}{{ year }}/{{ month }} ">{{ year }} - {{ month }}</a>
               {% endfor %}
             </div>
