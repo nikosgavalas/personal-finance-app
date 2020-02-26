@@ -11,6 +11,15 @@
    - Reference entry from transaction
 6. Output aggregates/insights/charts
 
+## TODO
+- Backup cronjob in deployment script
+- HTTPS with certbot
+- Better login page
+- Better form page
+- Better confirm delete page
+- Better font
+- Add tests, CI/CD?
+
 ## Notes to self
 #### General
 - https://docs.djangoproject.com/en/3.0/topics/auth/default/#the-login-required-decorator
