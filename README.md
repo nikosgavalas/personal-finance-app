@@ -20,6 +20,8 @@
 - Better confirm delete page
 - Better font
 - Add tests, CI/CD?
+- Add theme selection from https://bootswatch.com/ ?
+- Replace edit/delete/confirmation operations with bootstrap modals?
 
 ## Notes to self
 #### General
