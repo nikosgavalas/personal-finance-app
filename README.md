@@ -12,6 +12,7 @@
 6. Output aggregates/insights/charts
 
 ## TODO
+- Chart colors, with random color generation
 - Backup cronjob in deployment script
 - HTTPS with certbot
 - Better login page
