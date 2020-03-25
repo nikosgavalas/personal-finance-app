@@ -24,14 +24,14 @@ if [[ ! -d $DEPL_DIR/venv ]]; then
 else
     echo "already present."
 fi
-chown -R www-data:www-data /srv/venv
+chown -R www-data:www-data $DEPL_DIR/venv
 
 ADMIN_DIR=$(source $DEPL_DIR/venv/bin/activate; python -c "import django.contrib.admin as _; print(_.__path__[0])")
 
 echo -n "configuring database..."
 mkdir -p $DEPL_DIR/db
 touch $DEPL_DIR/db/prod.sqlite3
-chown -R www-data:www-data /srv/db
+chown -R www-data:www-data $DEPL_DIR/db
 (source $DEPL_DIR/venv/bin/activate; cd $DEPL_DIR/capital; python manage.py migrate)
 
 echo configuring apache...
@@ -91,4 +91,5 @@ EOF
 a2ensite capital
 a2ensite capital-le-ssl
 a2enmod wsgi
-systemctl reload apache2
+
+systemctl restart apache2
