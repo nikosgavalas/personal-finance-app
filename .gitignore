@@ -1,5 +1,9 @@
+.vscode
 .idea
 *.csv
-insert.py
+*.tar.gz
 *.sqlite3
 __pycache__
+*.pyc
+venv
+
