@@ -1,0 +1,2 @@
+Django==3.0.3
+mod-wsgi==4.7.1

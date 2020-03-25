@@ -15,18 +15,16 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 with open('/etc/secret.key') as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['home.nickgavalas.com', '192.168.2.2']
+ALLOWED_HOSTS = ['capital.nickgavalas.com']
 
 
 # Application definition
@@ -78,7 +76,7 @@ WSGI_APPLICATION = 'capital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/srv/db/prod.sqlite3',
+        'NAME': '/srv/capital/db/prod.sqlite3',
     }
 }
 
