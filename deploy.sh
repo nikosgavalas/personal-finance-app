@@ -1,15 +1,16 @@
 #!/bin/bash
 
+
 [ "$UID" -eq 0 ] || { echo run as root.; exit 1; }
 
 BASE_DIR="$(cd "$(dirname "$0")"; pwd)"
-DEPL_DIR=/srv/capital
+DEPL_DIR=/mnt/storage/srv/capital
 
 PIP_REQS=$BASE_DIR/requirements_prod.txt
 export DJANGO_SETTINGS_MODULE="capital.settings_prod"
 
 echo installing dependencies...
-# apt install -y apache2 apache2-dev python3-venv
+apt install -y apache2 apache2-dev python3 python3-pip python3-venv
 
 echo installing sources...
 rm -rf $DEPL_DIR/capital
@@ -19,7 +20,7 @@ chown -R www-data:www-data $DEPL_DIR/capital
 echo -n "installing the python virtual environment..."
 if [[ ! -d $DEPL_DIR/venv ]]; then
     (cd $DEPL_DIR; python3 -m venv venv)
-    (source $DEPL_DIR/venv/bin/activate; pip install -r $BASE_DIR/requirements_prod.txt; mod_wsgi-express module-config > /etc/apache2/mods-available/wsgi.load)
+    (source $DEPL_DIR/venv/bin/activate; pip install wheel; pip install -r $BASE_DIR/requirements_prod.txt; mod_wsgi-express module-config > /etc/apache2/mods-available/wsgi.load)
     echo OK
 else
     echo "already present."

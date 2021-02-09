@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'capital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/srv/capital/db/prod.sqlite3',
+        'NAME': '/mnt/storage/srv/capital/db/prod.sqlite3',
     }
 }
 
