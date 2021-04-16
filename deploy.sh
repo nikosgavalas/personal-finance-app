@@ -4,7 +4,7 @@
 [ "$UID" -eq 0 ] || { echo run as root.; exit 1; }
 
 BASE_DIR="$(cd "$(dirname "$0")"; pwd)"
-DEPL_DIR=/mnt/storage/srv/capital
+DEPL_DIR=/srv/capital
 
 PIP_REQS=$BASE_DIR/requirements_prod.txt
 export DJANGO_SETTINGS_MODULE="capital.settings_prod"
