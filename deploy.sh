@@ -1,6 +1,10 @@
 #!/bin/bash
 
 
+USER=pi
+GROUP=pi
+
+
 [ "$UID" -eq 0 ] || { echo run as root.; exit 1; }
 
 BASE_DIR="$(cd "$(dirname "$0")"; pwd)"
@@ -15,7 +19,7 @@ apt install -y apache2 apache2-dev python3 python3-pip python3-venv
 echo installing sources...
 rm -rf $DEPL_DIR/capital
 cp -a "$BASE_DIR/capital" $DEPL_DIR
-chown -R www-data:www-data $DEPL_DIR/capital
+chown -R ${USER}:${GROUP} $DEPL_DIR/capital
 
 echo -n "installing the python virtual environment..."
 if [[ ! -d $DEPL_DIR/venv ]]; then
@@ -25,14 +29,14 @@ if [[ ! -d $DEPL_DIR/venv ]]; then
 else
     echo "already present."
 fi
-chown -R www-data:www-data $DEPL_DIR/venv
+chown -R ${USER}:${GROUP} $DEPL_DIR/venv
 
 ADMIN_DIR=$(source $DEPL_DIR/venv/bin/activate; python -c "import django.contrib.admin as _; print(_.__path__[0])")
 
 echo -n "configuring database..."
 mkdir -p $DEPL_DIR/db
 touch $DEPL_DIR/db/prod.sqlite3
-chown -R www-data:www-data $DEPL_DIR/db
+chown -R ${USER}:${GROUP} $DEPL_DIR/db
 (source $DEPL_DIR/venv/bin/activate; cd $DEPL_DIR/capital; python manage.py migrate)
 
 echo configuring apache...
